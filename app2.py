@@ -28,7 +28,7 @@ class TextCleaner(BaseEstimator, TransformerMixin):
         self.stopwords = stopwords_set - negations
 
         self._emoji_pattern = re.compile(
-            "[" 
+            "["
             "\U0001F600-\U0001F64F"
             "\U0001F300-\U0001F5FF"
             "\U0001F680-\U0001F6FF"
@@ -123,13 +123,13 @@ st.title("🎬 IMDB Sentiment Analyzer")
 
 # Sidebar
 with st.sidebar:
-    st.header("⚙️ Ayarlar")
-    show_keywords = st.checkbox("Anahtar kelimeleri göster", True)
-    show_cleaned  = st.checkbox("Temizlenmiş metni göster", False)
+    st.header("⚙️ Settings")
+    show_keywords = st.checkbox("Show keywords", True)
+    show_cleaned  = st.checkbox("Show cleaned text", False)
 
 # Input
 text = st.text_area(
-    "Bir yorum yaz:",
+    "Write a review:",
     placeholder="This movie was absolutely amazing...",
     height=150
 )
@@ -137,17 +137,17 @@ text = st.text_area(
 # ─────────────────────────────────────────────────────
 # Prediction
 # ─────────────────────────────────────────────────────
-if st.button("Analiz Et"):
+if st.button("Analyze"):
     if not text.strip():
-        st.warning("Lütfen bir yorum gir.")
+        st.warning("Please enter a review.")
         st.stop()
 
-    with st.spinner("Analiz ediliyor..."):
+    with st.spinner("Analyzing..."):
         try:
             proba = pipeline.predict_proba([text])[0]
             pred  = pipeline.predict([text])[0]
         except Exception:
-            st.error("Model çalıştırılırken hata oluştu.")
+            st.error("An error occurred while running the model.")
             st.stop()
 
     pos_conf = float(proba[1])
@@ -156,9 +156,9 @@ if st.button("Analiz Et"):
 
     # Result
     if is_pos:
-        st.success(f"😊 Positive — %{pos_conf*100:.1f} emin")
+        st.success(f"😊 Positive — {pos_conf*100:.1f}% confidence")
     else:
-        st.error(f"😔 Negative — %{neg_conf*100:.1f} emin")
+        st.error(f"😔 Negative — {neg_conf*100:.1f}% confidence")
 
     # Confidence
     st.subheader("📊 Confidence Scores")
@@ -175,24 +175,24 @@ if st.button("Analiz Et"):
     cleaned_text = pipeline.named_steps["cleaner"].transform([text])[0]
 
     if show_cleaned:
-        st.subheader("🧹 Temizlenmiş Metin")
+        st.subheader("🧹 Cleaned Text")
         st.code(cleaned_text)
 
     # Keywords
     pos_kws, neg_kws = get_keywords(text, pipeline)
 
     if show_keywords:
-        st.subheader("🧠 Model Neye Göre Karar Verdi?")
+        st.subheader("🧠 What Did the Model Base Its Decision On?")
         highlighted = highlight_text(text, pos_kws, neg_kws)
         st.markdown(highlighted, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
-            st.write("🟢 Pozitif kelimeler")
+            st.write("🟢 Positive keywords")
             for w in pos_kws:
                 st.write(f"• {w}")
         with col2:
-            st.write("🔴 Negatif kelimeler")
+            st.write("🔴 Negative keywords")
             for w in neg_kws:
                 st.write(f"• {w}")
 
